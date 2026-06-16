@@ -9,6 +9,14 @@ public class Stats extends HashSet<Attribute> implements Serializable {
     private static final long serialVersionUID = 3020L;
 
     @Override
+    public boolean add(Attribute attribute) {
+        if (!contains(attribute))
+            return super.add(attribute);
+
+        return false;
+    }
+
+    @Override
     public boolean contains(Object o) {
         if (!(o instanceof Attribute attribute))
             return false;

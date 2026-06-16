@@ -15,13 +15,11 @@ public abstract class Entity implements Serializable {
     private Stats stats;
 
     public Entity(String name) {
+        this.stats = new Stats();
         this.name = name;
     }
 
-    public void addAttribute(Attribute attribute) {
-        if (stats == null)
-            stats = new Stats();
-
-        stats.add(attribute);
+    public Stats getStats() {
+        return stats;
     }
 }
