@@ -74,6 +74,6 @@ public class WorkbenchLayout implements LayoutManager {
                 if (width < label.getText().length())
                     width = label.getText().length();
 
-        return this.width = width * 11;
+        return this.width = width * 14;
     }
 }
