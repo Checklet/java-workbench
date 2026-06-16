@@ -27,17 +27,6 @@ public class GUI extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(true);
 
-        JPanel test = new JPanel();
-
-        {
-            test.add(new JLabel("WWWWWW"));
-            test.add(new JTextField());
-            test.add(new JLabel("Test 2"));
-            test.add(new JTextField());
-
-            test.setLayout(new WorkbenchLayout());
-        }
-
         JPanel entityPanel = new JPanel();
 
         {
@@ -47,6 +36,8 @@ public class GUI extends JFrame {
 
             entityPanel.add(new JLabel("Name"));
             entityPanel.add(entityNameInput);
+
+            entityPanel.setLayout(new WorkbenchLayout());
         }
 
         JPanel attributePanel = new JPanel();
@@ -62,6 +53,8 @@ public class GUI extends JFrame {
             attributePanel.add(attributeNameInput);
             attributePanel.add(new JLabel("Value"));
             attributePanel.add(attributeValueInput);
+
+            attributePanel.setLayout(new WorkbenchLayout());
         }
 
         JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
@@ -69,7 +62,6 @@ public class GUI extends JFrame {
         {
             tabbedPane.addTab("Entity", entityPanel);
             tabbedPane.addTab("Attribute", attributePanel);
-            tabbedPane.addTab("Test", test);
             tabbedPane.setSelectedIndex(0);
         }
 
