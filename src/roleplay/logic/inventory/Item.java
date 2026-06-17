@@ -38,4 +38,12 @@ public class Item implements Serializable, Comparable<Item> {
 
         return Integer.compare(otherName.length, thisName.length);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Item item))
+            return false;
+
+        return this.getName().equals((item.getName()));
+    }
 }
