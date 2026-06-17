@@ -2,20 +2,20 @@ package roleplay.logic.inventory;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.Iterator;
 
-public class Inventory implements Serializable, Set<Item>, Iterator<Item> {
+public class Inventory implements Serializable, Collection<Item>, Iterator<Item> {
     @Serial
     private static final long serialVersionUID = 2010L;
 
-    private InventorySlot[] items;
+    private Item[] items;
     private int position;
     private int size;
     private int capacity;
 
     public Inventory(int capacity) {
-        this.items = new InventorySlot[20];
+        this.items = new Item[20];
         this.capacity = capacity;
     }
 
@@ -30,8 +30,9 @@ public class Inventory implements Serializable, Set<Item>, Iterator<Item> {
 
     @Override
     public Item next() {
-        return this.items[++position].getItem();
+        return this.items[++position];
     }
+
 
     @Override
     public int size() {
@@ -45,14 +46,14 @@ public class Inventory implements Serializable, Set<Item>, Iterator<Item> {
 
     @Override
     public boolean contains(Object o) {
-         if (!(o instanceof Item i))
-             return false;
+        if (!(o instanceof Item))
+            return false;
 
-         for (Item item : this)
-             if (item.getName().equals(i.getName()))
-                 return true;
+        for (Item item : this)
+            if (item.equals(o))
+                return true;
 
-         return false;
+        return false;
     }
 
     @Override
@@ -62,42 +63,30 @@ public class Inventory implements Serializable, Set<Item>, Iterator<Item> {
 
     @Override
     public Object[] toArray() {
-        Item[] arr = new Item[this.size];
+        Object[] arr = new Object[this.size];
 
         for (int i = 0; i < this.size; i++)
-            arr[i] = this.items[i].getItem();
+            arr[i] = this.items[i];
 
         return arr;
     }
 
     @Override
     public <T> T[] toArray(T[] a) {
-        return a;
+        return null;
     }
 
     @Override
     public boolean add(Item item) {
-        if (this.contains(item)) {
-            InventorySlot found = this.find(item);
-
-            if (found != null) {
-                found.increase();
-                return true;
-            }
-
-            throw new RuntimeException("List contains item but somehow cannot find it.");
-        }
+        if (item == null)
+            return false;
 
         if (this.size == this.items.length) {
-            InventorySlot[] newArr = new InventorySlot[this.size + 20];
-
-            for (int i = 0; i < this.items.length; i++)
-                newArr[i] = this.items[i];
-
-            this.items = newArr;
+            Item[] arr = new Item[this.size + 20];
+            System.arraycopy(this.items, 0, arr, 0, this.size);
         }
 
-        this.items[this.size++] = new InventorySlot(item);
+        this.items[this.size++] = item;
         return true;
     }
 
@@ -106,34 +95,22 @@ public class Inventory implements Serializable, Set<Item>, Iterator<Item> {
         if (!(o instanceof Item item))
             return false;
 
-        if (!this.contains(item))
+        int find = this.find(item);
+        if (find == -1)
             return false;
 
-        for (int i = 0; i < this.size; i++) {
-            InventorySlot slot = this.items[i];
+        for (int prev = find, over = find + 1; over < this.size; over++, prev++)
+            this.items[prev] = this.items[over];
 
-            if (slot.getItem().equals(item)) {
-                if (slot.decrease())
-                    for (int j = i + 1; j < this.size; j++, i++)
-                        this.items[i] = this.items[j];
-
-                return true;
-            }
-        }
-
-        throw new RuntimeException("Item is there but cannot be removed.");
-
+        this.size--;
+        return true;
     }
 
     @Override
     public boolean containsAll(Collection<?> c) {
-        for (Object o : c) {
-            if (!(o instanceof Item i))
+        for (Object o : c)
+            if (!this.contains(o))
                 return false;
-
-            if (!this.contains(i))
-                return false;
-        }
 
         return true;
     }
@@ -148,39 +125,36 @@ public class Inventory implements Serializable, Set<Item>, Iterator<Item> {
     }
 
     @Override
-    public boolean retainAll(Collection<?> c) {
-        if (this.containsAll(c))
-            return false;
-
-        for (Object current : c) {
-            if (!(current instanceof Item))
-                current = null;
-
-            if (!this.contains(current))
-                current = null;
-        }
+    public boolean removeAll(Collection<?> c) {
+        for (Object o : c)
+            if (!this.remove(o))
+                return false;
 
         return true;
     }
 
     @Override
-    public boolean removeAll(Collection<?> c) {
+    public boolean retainAll(Collection<?> c) {
         return false;
     }
 
     @Override
     public void clear() {
-
+        this.items = new Item[20];
+        this.size = 0;
     }
 
-    private InventorySlot find(Item item) {
+    private int find(Item item) {
+        if (item == null)
+            return -1;
+
         if (!this.contains(item))
-            return null;
+            return -1;
 
-        for (InventorySlot slot : this.items)
-            if (slot.getItem().getName().equals(item.getName()))
-                return slot;
+        for (int i = 0; i < this.items.length; i++)
+            if (this.items[i].equals(item))
+                return i;
 
-        return null;
+        return -1;
     }
 }
