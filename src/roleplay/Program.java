@@ -1,8 +1,7 @@
 package roleplay;
 
+import roleplay.logic.character.CharacterBuilder;
 import roleplay.logic.character.Player;
-import roleplay.logic.inventory.Item;
-import roleplay.logic.stats.Attribute;
 
 public final class Program {
     public static boolean isGui = false;
@@ -22,18 +21,11 @@ public final class Program {
     }
 
     private static void test() {
-        Player player = new Player("Checker");
-
-        player.getStats().add(new Attribute("Strength", 4));
-        player.getStats().add(new Attribute("Dexterity", 3));
-        player.getStats().add(new Attribute("Intelligence", 7));
-        player.getStats().add(new Attribute("Charisma", 5));
-        player.getStats().add(new Attribute("Health", 0, val -> val * 5 + 40));
-
-        player.getInventory().add(new Item("Map", 2));
-        player.getInventory().add(new Item("Compass", 2));
-        player.getInventory().add(new Item("Bandage", 1));
-
-
+        Player newPlayer = CharacterBuilder.character("Checkie")
+            .attribute("Strength", 4)
+            .attribute("Health", 0, val -> val * 5 + 40)
+            .item("Map", 2)
+            .item("Compass", 2)
+            .build();
     }
 }
