@@ -9,18 +9,27 @@ public class Inventory implements Serializable, Collection<Item>, Iterator<Item>
     @Serial
     private static final long serialVersionUID = 2010L;
 
-    private Item[] items;
+    private InventorySlot[] items;
     private int position;
     private int size;
     private int capacity;
 
     public Inventory(int capacity) {
-        this.items = new Item[20];
+        this.items = new InventorySlot[20];
         this.capacity = capacity;
     }
 
     public Inventory() {
         this(60);
+    }
+
+    public int getWeight() {
+        int weight = 0;
+
+        for (InventorySlot slot : items)
+            weight += slot.getWeight();
+
+        return weight;
     }
 
     @Override
@@ -30,13 +39,17 @@ public class Inventory implements Serializable, Collection<Item>, Iterator<Item>
 
     @Override
     public Item next() {
-        return this.items[++position];
+        return this.items[++position].getItem();
     }
-
 
     @Override
     public int size() {
-        return this.size;
+        int count = 0;
+
+        for (InventorySlot slot : items)
+            count += slot.getCount();
+
+        return count;
     }
 
     @Override
@@ -64,9 +77,7 @@ public class Inventory implements Serializable, Collection<Item>, Iterator<Item>
     @Override
     public Object[] toArray() {
         Object[] arr = new Object[this.size];
-
-        for (int i = 0; i < this.size; i++)
-            arr[i] = this.items[i];
+        System.arraycopy(this.items, 0, arr, 0, this.size);
 
         return arr;
     }
@@ -81,28 +92,41 @@ public class Inventory implements Serializable, Collection<Item>, Iterator<Item>
         if (item == null)
             return false;
 
-        if (this.size == this.items.length) {
-            Item[] arr = new Item[this.size + 20];
-            System.arraycopy(this.items, 0, arr, 0, this.size);
+        if (item.getWeight() + this.getWeight() > this.capacity)
+            return false;
+
+        if (!contains(item)) {
+            if (this.size == this.items.length) {
+                InventorySlot[] arr = new InventorySlot[this.size + 20];
+                System.arraycopy(this.items, 0, arr, 0, this.size);
+            }
+
+            this.items[this.size++] = new InventorySlot(item);
+        } else {
+            InventorySlot slot = new InventorySlot(item);
+            slot.increase();
         }
 
-        this.items[this.size++] = item;
         return true;
     }
 
     @Override
     public boolean remove(Object o) {
+        if (o == null)
+            return false;
+
         if (!(o instanceof Item item))
             return false;
 
-        int find = this.find(item);
-        if (find == -1)
+        if (!this.contains(item))
             return false;
 
-        for (int prev = find, over = find + 1; over < this.size; over++, prev++)
-            this.items[prev] = this.items[over];
+        if (!this.find(item).decrease())
+            for (int i = 0; i < this.items.length; i++)
+                if (this.items[i].getItem().equals(item))
+                    for (int j = i + 1; j < this.items.length; j++, i++)
+                        this.items[i] = this.items[j];
 
-        this.size--;
         return true;
     }
 
@@ -140,21 +164,35 @@ public class Inventory implements Serializable, Collection<Item>, Iterator<Item>
 
     @Override
     public void clear() {
-        this.items = new Item[20];
+        this.items = new InventorySlot[20];
         this.size = 0;
     }
 
-    private int find(Item item) {
+    private InventorySlot find(Item item) {
         if (item == null)
-            return -1;
+            return null;
 
         if (!this.contains(item))
-            return -1;
+            return null;
 
         for (int i = 0; i < this.items.length; i++)
-            if (this.items[i].equals(item))
-                return i;
+            if (this.items[i].getItem().equals(item))
+                return this.items[i];
 
-        return -1;
+        return null;
+    }
+
+    private int size(Item item) {
+        return this.size(item.getName());
+    }
+
+    private int size(String name) {
+        int count = 0;
+
+        for (Item item : this)
+            if (item.getName().equals(name))
+                count++;
+
+        return count;
     }
 }
